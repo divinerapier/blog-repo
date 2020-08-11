@@ -7,30 +7,6 @@ tags:
   - select statements
 ---
 
-1. WHERE Clause Optimization
-2. Range Optimization
-3. Index Merge Optimization
-4. Hash Join Optimization
-5. Engine Condition Pushdown Optimization
-6. Index Condition Pushdown Optimization
-7. Nested-Loop Join Algorithms
-8. Nested Join Optimization
-9. Outer Join Optimization
-10. Outer Join Simplification
-11. Multi-Range Read Optimization
-12. Block Nested-Loop and Batched Key Access Joins
-13. Condition Filtering
-14. Constant-Folding Optimization
-15. IS NULL Optimization
-16. ORDER BY Optimization
-17. GROUP BY Optimization
-18. DISTINCT Optimization
-19. LIMIT Query Optimization
-20. Function Call Optimization
-21. Window Function Optimization
-22. Row Constructor Expression Optimization
-23. Avoiding Full Table Scans
-
 数据库中所有查找操作，均以 `SELECT` 语句的形式执行。无论是实现网站秒级以内的响应时间，还是期望在生成大量的隔夜报告是缩短数小时的执行时间，调试这类语句都是重中之重。
 
 除了 `SELECT` 语句外，相同的技术还适用于诸如 `CREATE TABLE ... AS SELECT`，`INSERT INTO ... SELECT` 和 `DELETE` 语句中的 `WHERE` 子句。但由于这些语句同时会涉及到读写两种操作，因此还需要考虑其他方面的性能问题。
@@ -62,3 +38,29 @@ tags:
 * 即使查询已经使用了内存缓存，也依然可能对其进一步优化，使其需要更少的内存，从而使应用程序更具可伸缩性。比如，应用程序可以同时处理更多的用户，更大的请求量，而不会导致性能大幅下降。
 
 * 锁定问题，多个会话同时访问同一张表可能会影响查询速度。
+
+### 更多优化策略
+
+* [WHERE Clause Optimization](https://blog.divinerapier.cn/2020/08/01/where-clause-optimization/)
+* Range Optimization
+* Index Merge Optimization
+* Hash Join Optimization
+* Engine Condition Pushdown Optimization
+* Index Condition Pushdown Optimization
+* Nested-Loop Join Algorithms
+* Nested Join Optimization
+* Outer Join Optimization
+* Outer Join Simplification
+* Multi-Range Read Optimization
+* Block Nested-Loop and Batched Key Access Joins
+* Condition Filtering
+* Constant-Folding Optimization
+* IS NULL Optimization
+* ORDER BY Optimization
+* GROUP BY Optimization
+* DISTINCT Optimization
+* LIMIT Query Optimization
+* Function Call Optimization
+* Window Function Optimization
+* Row Constructor Expression Optimization
+* Avoiding Full Table Scans
