@@ -24,7 +24,7 @@ tags:
 
 在访问大多数网站 `(google, facebook)` 时，会使用单向认证的方式。客户端(浏览器)会验证服务端证书的合法性，过程如下：
 
-![01-one-way-authentication](../images/https-mutual-authentication/01-one-way-authentication.png)
+![01-one-way-authentication](/images/https-mutual-authentication/01-one-way-authentication.png)
 
 1. 客户端发起建立 `HTTPS` 连接请求，将 `SSL` 协议版本的信息发送给服务器端
 1. 服务器端将本机的公钥证书 `(server.crt)` 发送给客户端
@@ -37,7 +37,7 @@ tags:
 
 而在某些有较高安全性要求，或需要验证访问者身份的场景，则可能会需要用到双向认证的方式：
 
-![02-mutual-anthentication](../images/https-mutual-authentication/02-mutual-anthentication.png)
+![02-mutual-anthentication](/images/https-mutual-authentication/02-mutual-anthentication.png)
 
 1. 客户端发起建立 `HTTPS` 连接请求，将 `SSL` 协议版本的信息发送给服务端；
 1. 服务器端将本机的公钥证书 `(server.crt)` 发送给客户端
@@ -54,7 +54,7 @@ tags:
 
 生成这一些列证书之前，我们需要先生成一个 `CA` 根证书，然后由这个 `CA` 根证书颁发服务器公钥证书和客户端公钥证书。为了验证根证书颁发与验证客户端证书这个逻辑，我们使用根证书生成两套不同的客户端证书，然后同时用两个客户端证书来发送请求，看服务器端是否都能识别。下面是证书生成的内在逻辑示意图：
 
-![03-self-signed-sertificate](../images/https-mutual-authentication/03-self-signed-sertificate.png)
+![03-self-signed-sertificate](/images/https-mutual-authentication/03-self-signed-sertificate.png)
 
 ### 生成根证书
 

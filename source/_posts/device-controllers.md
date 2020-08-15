@@ -13,7 +13,7 @@ tags:
 
 下图为这种模块化的设计的简易示意图。
 
-![arrangement](../images/device-controllers/01-devices-arrangement.PNG)
+![arrangement](/images/device-controllers/01-devices-arrangement.PNG)
 
 控制器卡上有一些连接器，用途是允许通过线缆连接到设备上，大部分控制器卡支持两个，四个甚至八个设备。控制器和设备之间的接口可以是标准接口，比如 `ANSI`，`IEEE` 或 `ISO` 标准，也可以是事实上的标准，例如，`SATA`，`SCSI`，`USB`，`Thunderbolt` 或 `FireWire(IEEE 1394)`。
 
