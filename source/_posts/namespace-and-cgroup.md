@@ -152,8 +152,41 @@ int pid = clone(main_function, stack_size, CLONE_NEWPID | SIGCHLD, NULL);
 
 ![virtualization-vs-containers](/images/what-is-the-docker/virtualization-vs-containers.png)
 
+既然，虚拟机与容器是两种不同的技术，那么二者之间就应该有一些区别。
+
+#### 容器的优势
+
+##### 占用资源小
+
+容器占用的内存，要比同等功能的虚拟机占用的内存小，因为虚拟机本身也需要消耗一定的资源。比如，运行 `CentOS` 的 `KVM` 虚拟机至少需要 `100 ~ 200 MB` 的内存
+
+##### 更好的 I/O 性能
+
+在参考阅读 [An Updated Performance Comparison of Virtual Machines and Linux Containers](https://dominoweb.draco.res.ibm.com/reports/rc25482.pdf) 中显示
+
+* 在随机读写场景中，无论是 `iops` 还是 `latency`，容器的性能都接近于物理机性能，远好于 `KVM` 虚拟机
+* 在顺序读写场景中，容器的性能基本与物理机性能，略好于 `KVM` 虚拟机
+* 在 `host network` 场景中，容器的性能接近于物理机的性能，好于 `KVM` 虚拟机
+* 在 `nat network` 场景中，容器的性能略逊于 `KVM` 虚拟机，但差别不大
+
+总的来说，容器的 `I/O` 性能优于 `KVM` 虚拟机
+
+#### 容器的劣势
+
+##### 平台依赖性
+
+* 尽管，可以通过 `Mount Namespace` 的方式挂起与宿主机不同的 `Linux` 发行版，但容器中进程使用的内核依然是宿主机的内核。
+  * 因此 `Windows` 耗费了那么长的时间才对容器技术有了比较好的支持。
+  * 同样，也无法在低版本内核的宿主机上运行高版本内核的容器。
+
+##### 有限的隔离
+
+部分资源无法被隔离，比如 **时间**。
+
+如果在容器中调用 `settimeofday(2)` 系统调用修改系统时间，会导致宿主机系统的时间被修改，这显然是一个很可怕的事情。因此，在使用容器的时候必须要了解 **什么能做，什么不能做**。
+
 ## Cgroup
 
-既然，虚拟机与容器是两种不同的技术，那么二者之间就应该有一些区别。下面以容器技术作为比较的主体来对比二者。
+## 参考阅读
 
-先来说一下容器的优势。
+* [An Updated Performance Comparison of Virtual Machines and Linux Containers](https://dominoweb.draco.res.ibm.com/reports/rc25482.pdf)
