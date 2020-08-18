@@ -55,7 +55,7 @@ Status: Downloaded newer image for busybox:latest
 
 结果就是，在操作系统中创建了一个容器，该容器中执行的程序为 `/bin/sh`。并且，在容器启动之后，申请了一个随机的 `tty`，使用交互方式访问这个容器。
 
-此时，如果执行 `ps` 指令，会发现很有趣
+现在，执行 `ps` 指令，会发现很有趣
 
 ``` bash
 / # ps
@@ -64,4 +64,96 @@ PID   USER     TIME  COMMAND
     6 root      0:00 ps
 ```
 
-在创建容器时指定的 `/bin/sh` 进程，竟然就是容器内部的第一个进程`(pid=1)`。
+在创建容器时指定的 `/bin/sh` 进程，竟然就是容器内部的第一个进程`(pid=1)`，并且，这个容器内只有两个进程正在运行中，另一个进程是正在执行的 `ps` 指令。
+
+其实，这种现象就是通过 `namespace` 技术实现的。
+
+## Namespace
+
+首先，通过 `manpages` 对 `namespace` 有一个初步的了解:
+
+``` bash
+$ man namespaces
+NAMESPACES(7)                       Linux Programmer's Manual                       NAMESPACES(7)
+
+NAME
+       namespaces - overview of Linux namespaces
+
+DESCRIPTION
+       A namespace wraps a global system resource in an abstraction that makes it appear to the processes
+       within the namespace that they have their own isolated instance of the global resource. Changes to
+       the global resource are visible to other processes that are members of the namespace, but are
+       invisible to other processes. One use of namespaces is to implement containers.
+
+       This page provides pointers to information on the various namespace types, describes the associated
+      /proc files, and summarizes the APIs for working with namespaces.
+       ...
+```
+
+总的来说，`Linux Namespace` 提供了一种内核级别隔离系统资源的方法，通过将系统的全局资源放在不同的 `Namespace` 中，来实现资源隔离的目的。不同 `Namespace` 的程序，可以享有一份独立的系统资源。目前 `Linux` 中提供了以下几种系统资源的隔离机制：
+
+|Namespace| Flag            |Page                  |Isolates|
+|:--------|:----------------|:---------------------|:-------|
+|Cgroup    |CLONE_NEWCGROUP |cgroup_namespaces(7)  |Cgroup root directory|
+|IPC       |CLONE_NEWIPC    |ipc_namespaces(7)     |System V IPC, POSIX message queues|
+|Network   |CLONE_NEWNET    |network_namespaces(7) |Network devices, stacks, ports, etc.|
+|Mount     |CLONE_NEWNS     |mount_namespaces(7)   |Mount points|
+|PID       |CLONE_NEWPID    |pid_namespaces(7)     |Process IDs|
+|Time      |CLONE_NEWTIME   |time_namespaces(7)    |Boot and monotonic clocks|
+|User      |CLONE_NEWUSER   |user_namespaces(7)    |User and group IDs|
+|UTS       |CLONE_NEWUTS    |uts_namespaces(7)     |Hostname and NIS domain name|
+
+### 如何使用 Namespace 技术
+
+以 `PID Namespace` 为例，简单说明如何在编程中使用这种技术。
+
+`Linux` 实现 `Namespace` 机制的方式，就是在创建进程的时候，传入特定的选项即。更具体一些，就是在调用
+
+``` bash
+$ man 2 clone
+CLONE(2)                            Linux Programmer's Manual                           CLONE(2)
+
+NAME
+       clone, __clone2, clone3 - create a child process
+
+SYNOPSIS
+       /* Prototype for the glibc wrapper function */
+
+       #define _GNU_SOURCE
+       #include <sched.h>
+
+       int clone(int (*fn)(void *), void *stack, int flags, void *arg, ...
+                 /* pid_t *parent_tid, void *tls, pid_t *child_tid */ );
+```
+
+系统调用时，传入对应的 `Flag` 作为参数 `flag` 的值。比如:
+
+```  c
+int pid = clone(main_function, stack_size, SIGCHLD, NULL);
+```
+
+就会创建一个新的进程，并且返回它的进程号 `pid`。
+
+如果，同时指定 `CLONE_NEWPID` 参数:
+
+``` c
+int pid = clone(main_function, stack_size, CLONE_NEWPID | SIGCHLD, NULL);
+```
+
+新创建进程将会 **看到** 一个全新的进程空间，在这个进程空间里，它的 `pid` 是 `1`。之所以说 **看到**，是因为这只是一个 **障眼法**，在宿主机真实的进程空间里，这个进程的 `pid` 还是真实的数值，比如 `404`。
+
+如果多次执行上面的 `clone()` 调用，就会创建多个 `PID Namespace`，而每个 `Namespace` 里的应用进程都会认为自己是当前容器里的 **第 1 号进程**，它们既看不到宿主机里真正的进程空间，也看不到其他 `PID Namespace` 里的具体情况。
+
+而其他的几种 `Namespace`，在写法上与 `PID Namespace` 是相同的，区别只在于目的不同。
+
+所以，`Docker` 容器这个听起来玄而又玄的概念，实际上是在创建容器进程时，指定了这个进程所需要启用的一组 `Namespace` 参数。这样，容器就只能 **看到** 当前 `Namespace` 所限定的资源、文件、设备、状态，或者配置。而对于宿主机以及其他不相关的程序，它就完全看不到了。
+
+本质仍旧是进程。因此，在之前出现过的虚拟机对比容器的图片中，才没有出现 `Docker` 的位置。因为，容器只是通过 `Namespace` 技术被隔离的进程，与其他进程一样，也是直接运行在宿主机操作系统之上的。`Docker` 只是充当了一个管理者的身份。
+
+![virtualization-vs-containers](/images/what-is-the-docker/virtualization-vs-containers.png)
+
+## Cgroup
+
+既然，虚拟机与容器是两种不同的技术，那么二者之间就应该有一些区别。下面以容器技术作为比较的主体来对比二者。
+
+先来说一下容器的优势。
