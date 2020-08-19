@@ -187,6 +187,139 @@ int pid = clone(main_function, stack_size, CLONE_NEWPID | SIGCHLD, NULL);
 
 ## Cgroup
 
+`Namespace` 技术的作用是隔离进程，但只有隔离是不够的。虽然，容器内的进程无法感知到其他运行在宿主机上的进程或容器，但从操作系统的角度而言，所有的进程与容器都是平等的地位。这就意味着，虽然容器是一个独立的小空间，但其可用的资源仍旧与其他进程之间有着竞争的关系。
+
+因此，就需要用到 `Cgroup` 技术的帮助了。
+
+`Cgroup` 全称为 `Control Group`，用途是限制一个进程组能够使用的资源上限，包括 `CPU`、`MEM`、`DISK`、`NETWORK` 等。
+
+### Cgroup In Action
+
+在 `Linux` 中 `Everything is a file`，因此，操作 `Cgroup` 的途径也是通过文件系统。
+
+``` bash
+$ mount -t cgroup
+cgroup on /sys/fs/cgroup/cpuset type cgroup (rw,nosuid,nodev,noexec,relatime,cpuset)
+cgroup on /sys/fs/cgroup/cpu type cgroup (rw,nosuid,nodev,noexec,relatime,cpu)
+cgroup on /sys/fs/cgroup/cpuacct type cgroup (rw,nosuid,nodev,noexec,relatime,cpuacct)
+cgroup on /sys/fs/cgroup/blkio type cgroup (rw,nosuid,nodev,noexec,relatime,blkio)
+cgroup on /sys/fs/cgroup/memory type cgroup (rw,nosuid,nodev,noexec,relatime,memory)
+cgroup on /sys/fs/cgroup/devices type cgroup (rw,nosuid,nodev,noexec,relatime,devices)
+cgroup on /sys/fs/cgroup/freezer type cgroup (rw,nosuid,nodev,noexec,relatime,freezer)
+cgroup on /sys/fs/cgroup/net_cls type cgroup (rw,nosuid,nodev,noexec,relatime,net_cls)
+cgroup on /sys/fs/cgroup/perf_event type cgroup (rw,nosuid,nodev,noexec,relatime,perf_event)
+cgroup on /sys/fs/cgroup/net_prio type cgroup (rw,nosuid,nodev,noexec,relatime,net_prio)
+cgroup on /sys/fs/cgroup/hugetlb type cgroup (rw,nosuid,nodev,noexec,relatime,hugetlb)
+cgroup on /sys/fs/cgroup/pids type cgroup (rw,nosuid,nodev,noexec,relatime,pids)
+cgroup on /sys/fs/cgroup/rdma type cgroup (rw,nosuid,nodev,noexec,relatime,rdma)
+```
+
+可以看到，`Cgroup` 是一系列定义在 `/sys/fs/cgroup/` 目录下的各种文件或文件夹。每一个文件夹都被用来限制某一种特定的资源。以 `cpu` 资源为例:
+
+``` bash
+$ ls /sys/fs/cgroup/cpu
+000-metadata  cgroup.clone_children  cpu.cfs_period_us  cpu.rt_runtime_us  docker    notify_on_release  systemreserved
+001-binfmt    cgroup.procs           cpu.cfs_quota_us   cpu.shares         kmsg      podruntime         tasks
+002-bridge    cgroup.sane_behavior   cpu.rt_period_us   cpu.stat           kubepods  release_agent
+```
+
+列举了限制 `cpu` 资源的各种参数选项。
+
+使用 `Cgroup` 的方式非常简单，在对应的资源目录下面创建一个目录，比如:
+
+``` bash
+$ sudo mkdir -p /sys/fs/cgroup/cpu/container
+
+$ ls /sys/fs/cgroup/cpu/container
+cgroup.clone_children  cpu.cfs_period_us  cpu.rt_period_us   cpu.shares  notify_on_release
+cgroup.procs           cpu.cfs_quota_us   cpu.rt_runtime_us  cpu.stat    tasks
+```
+
+这个目录被称作 **控制组**，`Linux` 会在控制组下自动创建各种资源限制文件。
+
+然后，在后台执行脚本:
+
+``` bash
+$ while : ; do : ; done &
+[1] 12555
+```
+
+显然，这是一个死循环进程，会占用 `100%` 的 `CPU`。使用 `top` 指令，也可以确认确实使用了 `100%` 的 `CPU`。
+
+``` bash
+$ top -p 12555
+top - 21:00:26 up  4:43,  0 users,  load average: 0.66, 0.66, 0.56
+Tasks:   1 total,   1 running,   0 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.0 us,  2.5 sy,  3.7 ni, 93.7 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem :   7958.1 total,   5885.9 free,    539.2 used,   1533.0 buff/cache
+MiB Swap:  16384.0 total,  16384.0 free,      0.0 used.   7183.5 avail Mem
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+12555 diviner+  25   5   13576   4816      0 R 100.0   0.1   0:46.30 zsh
+```
+
+接下来，是时候展现 `Cgroup` 的魔法了。首先，查看两个接下来要使用的关键文件:
+
+``` bash
+$ cat /sys/fs/cgroup/cpu/container/cpu.cfs_quota_us
+-1
+$ cat /sys/fs/cgroup/cpu/container/cpu.cfs_period_us
+100000
+```
+
+* **cfs_period_us**: 资源组获取资源的时间周期，单位微妙
+* **cfs_quota_us**: 在获取资源时间周期内获得资源的时间，单位微妙
+
+所以 `usage = cfs_quota_us / cfs_period_us`。
+
+为了验证这一点，尝试将进程的 `CPU` 使用率控制在 `20%`。
+
+首先，根据上面推测的公式，因为 `cfs_period_us = 100000`，所以应该修改 `cfs_quota_us`:
+
+``` bash
+$ echo 20000 | sudo tee /sys/fs/cgroup/cpu/container/cpu.cfs_quota_us
+```
+
+但这还不够，还需要将被限制的进程的 `PID` 写入到 **控制组** `container` 的 `tasks`:
+
+``` bash
+$ echo 12555 | sudo tee /sys/fs/cgroup/cpu/container/tasks
+```
+
+然后使用 `top` 查看:
+
+``` bash
+top - 21:09:11 up  4:52,  0 users,  load average: 0.41, 0.76, 0.70
+Tasks:   1 total,   1 running,   0 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.0 us,  0.8 sy,  0.9 ni, 98.4 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem :   7958.1 total,   5883.8 free,    541.1 used,   1533.1 buff/cache
+MiB Swap:  16384.0 total,  16384.0 free,      0.0 used.   7181.6 avail Mem
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+12555 diviner+  25   5   13576   4816      0 R  20.0   0.1   8:17.25 zsh
+```
+
+`Linux Cgroups` 的设计还是比较易用的，可以简单地理解为，一个子系统目录加上一组资源限制文件的组合。而对于 `Docker` 等 `Linux` 容器项目来说，它们只需要在每个子系统下面，为每个容器创建一个**控制组** (即创建一个新目录)，然后在启动容器进程之后，把这个进程的 `PID` 填写到对应控制组的 `tasks` 文件中就可以了。
+
+## Cgroup in Docker
+
+在通过 `Docker` 启动容器的时候，也可以限制 `cpu` 使用率:
+
+``` bash
+$ docker run -it --cpu-period=100000 --cpu-quota=20000 ubuntu /bin/bash
+611f8f2c0c7613c2f3f3964e7dc3dbe407c74689e376736e34d7fe4735ec95d4
+```
+
+``` bash
+$ cat /sys/fs/cgroup/cpu/docker/611f8f2c0c7613c2f3f3964e7dc3dbe407c74689e376736e34d7fe4735ec95d4/cpu.cfs_period_us
+100000
+
+$ cat /sys/fs/cgroup/cpu/docker/611f8f2c0c7613c2f3f3964e7dc3dbe407c74689e376736e34d7fe4735ec95d4/cpu.cfs_quota_us
+20000
+```
+
+此时，这个容器最多只能使用 `20%` 的 `CPU`。
+
 ## 参考阅读
 
 * [An Updated Performance Comparison of Virtual Machines and Linux Containers](https://dominoweb.draco.res.ibm.com/reports/rc25482.pdf)
