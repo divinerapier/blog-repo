@@ -4,6 +4,8 @@ date: 2020-08-20 09:50:18
 tags:
   - container
   - docker image
+  - mount namespace
+  - unionfs
 ---
 
 `Namespace` 与 `Cgroup` 技术是容器技术的核心点，但 `Docker` 项目的成功关键点却要归功于 `Docker Image` 的发明。在 `Cloud Foundry` 时代，**上云** 的过程需要经过多次 **玄学调参** 才能解决由于本地环境与云主机的差异性所导致的问题。`Docker` 则通过 `Mount Namespace` 与 `UnionFS` 技术，成功的解决了这个问题。
