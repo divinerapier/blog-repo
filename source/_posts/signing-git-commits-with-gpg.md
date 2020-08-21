@@ -1,5 +1,5 @@
 ---
-title: signing-git-commits-with-gpg
+title: 使用 GPG 签名认证 git 提交
 date: 2020-07-26 09:43:46
 tags: git
 ---
