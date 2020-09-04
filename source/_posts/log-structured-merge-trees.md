@@ -4,7 +4,11 @@ date: 2020-08-26 21:37:03
 tags:
   - lsm tree
   - sstable
+  - storage engine
 ---
+
+转自 [Log Structured Merge Trees](https://medium.com/swlh/log-structured-merge-trees-9c8e2bea89e8)。
+
 LSM tree is at the heart of most storage systems that provide high write throughput, be it a key-value storage like dynamodb/cassandra or a messaging system like pulsar which is backed by bookkeeper.
 
 The various components of a typical LSM backed system are shown below.
