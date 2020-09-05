@@ -1,5 +1,5 @@
 ---
-title: windows-terminal
+title: Windows Terminal
 date: 2020-09-05 09:41:34
 tags:
   - windows
@@ -8,7 +8,7 @@ tags:
 
 [`Windows Terminal`](https://docs.microsoft.com/en-us/windows/terminal/) 是继 `WSL` 之后出品的又一个开发者友好的现代化应用程序。在支持原有的 `CMD`、`Powershell` 之外，还支持 `WSL` 子系统。其主要特性包括: 多 `tab`，多 `panes`，支持显示 `Unicode` 与 `UTF-8` 字符，使用 `GPU` 加速的文本渲染引擎，内置 `SSH` 客户端，更允许用户自定义主题及文本样式，颜色，背景，快捷键等。
 
-更多内容请阅读官方文档。
+更多内容请阅读[官方文档](https://docs.microsoft.com/en-us/windows/terminal/)。
 
 ## 我的配置文件
 
