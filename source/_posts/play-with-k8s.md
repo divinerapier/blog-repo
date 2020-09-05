@@ -80,3 +80,7 @@ serviceaccount/kube-router unchanged
 clusterrole.rbac.authorization.k8s.io/kube-router unchanged
 clusterrolebinding.rbac.authorization.k8s.io/kube-router unchanged
 ```
+
+## 总结
+
+部署完了，用去吧。
