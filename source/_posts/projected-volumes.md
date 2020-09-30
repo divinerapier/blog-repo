@@ -246,6 +246,38 @@ password
 
 可以看到，在 `mountPath` 指定的路径下面有预先定义好的 `Secret`，并且文件名就是创建 `Secret` 的 `yaml` 文件中，`data` 字段的 `key`，内容为对应 `value` 经过 `base64` 解码之后的结果。
 
+## Config Map
+
+与 `Secret` 相同的是，`ConfigMap` 也用于保存用户定义的配置信息；不同的是，`ConfigMap` 中的数据使用保持明文形式。
+
+比如，原始配置保存在 `example/ui.properties` 中，通过该文件创建一个 `ConfigMap`:
+
+``` bash
+# .properties文件的内容
+$ cat example/ui.properties
+color.good=purple
+color.bad=yellow
+allow.textmode=true
+how.nice.to.look=fairlyNice
+
+# 从 .properties 文件创建 ConfigMap
+$ kubectl create configmap ui-config --from-file=example/ui.properties
+
+# 以 yaml 格式查看 ConfigMap 里保存的信息(data)
+$ kubectl get configmaps ui-config -o yaml
+apiVersion: v1
+data:
+  ui.properties: |
+    color.good=purple
+    color.bad=yellow
+    allow.textmode=true
+    how.nice.to.look=fairlyNice
+kind: ConfigMap
+metadata:
+  name: ui-config
+  ...
+```
+
 ## Downward API
 
 > A downwardAPI volume is used to make downward API data available to applications. It mounts a directory and writes the requested data in plain text files.
