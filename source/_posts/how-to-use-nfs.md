@@ -1,8 +1,9 @@
 ---
-title: 挂载 NFS
+title: 使用 NFS
 date: 2020-10-02 16:18:20
 tags:
   - nfs
+  - filesystem
 ---
 
 查看被分享目录的属性:
