@@ -139,4 +139,5 @@ for {
 
 ## 参考文档
 
-* [Controllers](https://kubernetes.io/docs/concepts/architecture/controller/)
+* [Architecture-Controllers](https://kubernetes.io/docs/concepts/architecture/controller/)
+* [Workloads-Controllers](https://kubernetes.io/docs/concepts/workloads/controllers/)
