@@ -72,3 +72,6 @@ $ make -j; make -j install
 
 * [MPI Tutorial Introduction](https://mpitutorial.com/tutorials/mpi-introduction/)
 * [OpenMPI FAQ](https://www.open-mpi.org/faq/)
+* [MPI Forum](https://www.mpi-forum.org/)
+* [The "Introduction to MPI" and "Intermediate MPI" tutorials](https://www.citutor.org//browse.php)
+* [UNIVERSITY OF HULL HPC: OpenMPI](http://hpc.mediawiki.hull.ac.uk/Applications/OpenMPI)
