@@ -44,6 +44,31 @@ tags:
 
 在很多情况下，某个进程可能需要跟所有其他进程通信。比如主进程想发一个广播给所有的从进程。在这种情况下，如果通过写代码的方式来完成所有的发送和接收过程会很麻烦。并且，事实上，这种方式往往也不会以最佳方式使用网络。MPI 可以处理各种各样的这些涉及所有进程的 **集体(Collective)通信** 类型。
 
+## 使用 MPI
+
+**MPI** 只是一套接口标准，无法直接使用。对此不必担心，业内已经存在很多符合标准的实现。其中 **OpenMPI** 就是最受欢迎的实现之一。因此，之后的内容基于 **OpenMPI** 展开。
+
+### 安装 OpenMPI
+
+从 [这里](https://www.open-mpi.org/software/ompi/v4.0/) 可以找到最新的版本，本文基于版本 [4.0.5](https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.5.tar.gz)。
+
+``` bash
+# download package
+$ wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.5.tar.gz
+
+# extract files
+$ tar xzf openmpi-4.0.5.tar.gz
+
+$ cd openmpi-4.0.5
+
+# configure project
+$ mkdir -p build; ./configure --prefix=$(pwd)/build
+
+# build
+$ make -j; make -j install
+```
+
 ## 参考文档
 
 * [MPI Tutorial Introduction](https://mpitutorial.com/tutorials/mpi-introduction/)
+* [OpenMPI FAQ](https://www.open-mpi.org/faq/)
