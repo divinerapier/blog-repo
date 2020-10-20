@@ -148,6 +148,25 @@ spec:
 
 ### HostPath
 
+A hostPath volume mounts a file or directory from the host node's filesystem into your Pod. This is not something that most Pods will need, but it offers a powerful escape hatch for some applications.
+
+**hostPath** 类型的 **Volume** 会将宿主机节点的路径挂载到
+
+For example, some uses for a hostPath are:
+
+running a Container that needs access to Docker internals; use a hostPath of /var/lib/docker
+running cAdvisor in a Container; use a hostPath of /sys
+allowing a Pod to specify whether a given hostPath should exist prior to the Pod running, whether it should be created, and what it should exist as
+In addition to the required path property, user can optionally specify a type for a hostPath volume.
+
+The supported values for field type are:
+
+Value	Behavior		Empty string (default) is for backward compatibility, which means that no checks will be performed before mounting the hostPath volume.	DirectoryOrCreate	If nothing exists at the given path, an empty directory will be created there as needed with permission set to 0755, having the same group and ownership with Kubelet.	Directory	A directory must exist at the given path	FileOrCreate	If nothing exists at the given path, an empty file will be created there as needed with permission set to 0644, having the same group and ownership with Kubelet.	File	A file must exist at the given path	Socket	A UNIX socket must exist at the given path	CharDevice	A character device must exist at the given path	BlockDevice	A block device must exist at the given path
+Watch out when using this type of volume, because:
+
+Pods with identical configuration (such as created from a podTemplate) may behave differently on different nodes due to different files on the nodes
+when Kubernetes adds resource-aware scheduling, as is planned, it will not be able to account for resources used by a hostPath
+the files or directories created on the underlying hosts are only writable by root. You either need to run your process as root in a privileged Container or modify the file permissions on the host to be able to write to a hostPath volume
 ### Local
 
 ### Nfs
