@@ -93,7 +93,24 @@ sudo setenforce 0
 
 ## 拉取 gcr 镜像
 
+需要在所有的 **Master** 节点与 **Worker** 节点拉取镜像。
+
+**bash** 环境使用如下脚本:
+
 ``` bash
+image_list=$(kubeadm config images list)
+
+for image in ${image_list} ; do
+  name=$(echo ${image} | cut -d'/' -f2)
+  docker pull registry.aliyuncs.com/google_containers/$name
+  docker image tag registry.aliyuncs.com/google_containers/$name k8s.gcr.io/$name
+  docker image rm registry.aliyuncs.com/google_containers/$name
+done
+```
+
+**zsh** 环境使用如下脚本:
+
+``` zsh
 image_list=$(kubeadm config images list)
 images=(`echo ${image_list} | tr '\n' ' '`)
 
@@ -105,8 +122,9 @@ for image in ${images} ; do
 done
 ```
 
+## 初始化 Master 节点
 
-## 初始化
+在 **Master** 节点执行命令:
 
 ``` bash
 sudo kubeadm init --apiserver-advertise-address $(hostname -i) --pod-network-cidr 10.5.0.0/16 --v=5
@@ -140,7 +158,28 @@ kubeadm init \
   --pod-network-cidr=10.244.0.0/16
 ```
 
-## 添加节点
+然后配置 **kubeconfig**:
+
+``` bash
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+```
+
+## 配置网络
+
+### Calico
+
+``` bash
+mkdir -p calico; cd calico
+curl https://docs.projectcalico.org/manifests/canal.yaml -O
+kubectl apply -f canal.yaml
+cd -
+```
+
+## 添加 Worker 节点
+
+在 **Worker** 节点执行命令:
 
 ``` bash
 sudo kubeadm join 192.168.50.5:6443 --token 4n2pwp.hq9jyo3auaibma3q     --discovery-token-ca-cert-hash sha256:750da2c87a67b96bfec73ade40888d22b61e045fdd28bbb7a4ff2c6ce3e0309c
@@ -171,3 +210,5 @@ kubeadm reset
 * [Container runtimes](https://kubernetes.io/docs/setup/production-environment/container-runtimes/)
 * [Installing kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
 * [Creating a cluster with kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/)
+* [Deploying kube-router with kubeadm](https://github.com/cloudnativelabs/kube-router/blob/master/docs/kubeadm.md)
+* [Install Calico for policy and flannel (aka Canal) for networking](https://docs.projectcalico.org/getting-started/kubernetes/flannel/flannel)
