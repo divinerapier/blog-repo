@@ -127,7 +127,9 @@ done
 在 **Master** 节点执行命令:
 
 ``` bash
-sudo kubeadm init --apiserver-advertise-address $(hostname -i) --pod-network-cidr 10.5.0.0/16 --v=5
+sudo kubeadm init \
+  --apiserver-advertise-address $(hostname -i) \
+  --pod-network-cidr 10.244.0.0/16 --v=5
 
 Your Kubernetes control-plane has initialized successfully!
 
@@ -147,14 +149,13 @@ kubeadm join 192.168.50.5:6443 --token 7zjyq9.x3xkoatt6pb1cbsu \
     --discovery-token-ca-cert-hash sha256:1c78c44bc57e6e887c5f81e7a9c6c3e52f098e1ba9255f5303ac78129d410774
 ```
 
-或者省略下载镜像步骤，直接创建集群 (未测试):
+或者省略下载镜像步骤，直接创建集群:
 
 ``` bash
-kubeadm init \
-  --apiserver-advertise-address=192.168.50.5 \
+sudo kubeadm init \
+  --apiserver-advertise-address=$(hostname -i) \
   --image-repository registry.aliyuncs.com/google_containers \
-  --kubernetes-version v1.14.0 \
-  --service-cidr=10.1.0.0/16 \
+  --service-cidr=10.5.0.0/16 \
   --pod-network-cidr=10.244.0.0/16
 ```
 
@@ -171,10 +172,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ### Calico
 
 ``` bash
-mkdir -p calico; cd calico
-curl https://docs.projectcalico.org/manifests/canal.yaml -O
-kubectl apply -f canal.yaml
-cd -
+kubectl apply -f https://docs.projectcalico.org/manifests/canal.yaml
 ```
 
 ## 添加 Worker 节点
@@ -191,17 +189,20 @@ This node has joined the cluster:
 Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
 ```
 
-有几点要求或注意事项:
+## 测试集群
 
-1. 如果 **$(hostname -i)** 的结果为回环地址，需要修改 **/etc/hosts** 文件
-2. 要求 **CPU** 核心数大于 2，关闭 **swap**
+``` bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/website/master/content/en/examples/application/nginx-app.yaml
+```
 
 ## 清理集群
 
 在期望清理的节点执行:
 
 ``` bash
-kubeadm reset
+sudo kubeadm reset
+sudo rm -rf /etc/cni/net.d
+rm -rf ~/.kube
 ```
 
 ## 参考文档
