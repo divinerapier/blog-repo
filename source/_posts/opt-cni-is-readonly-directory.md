@@ -1,5 +1,5 @@
 ---
-title: 目录 /opt/bin 是只读目录 
+title: /opt/cni - readonly filesystem
 date: 2020-10-26 11:44:37
 tags:
   - kubernetes
@@ -73,7 +73,7 @@ $ journalctl -f
 error while creating mount source path '/opt/cni/bin': mkdir /opt/cni: read-only file system
 ```
 
-但宿主机目录 **/opt/bin** 的权限为:
+但宿主机目录 **/opt/cni** 的权限为:
 
 ``` bash
 $ stat /opt/cni/
