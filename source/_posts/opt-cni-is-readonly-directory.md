@@ -56,7 +56,8 @@ tags:
 1. 查看 **Worker** 节点上 **Kubelet** 与 **Docker** 日志:
 
   ``` bash
-  divinerapier@ubuntu-01:~$ journalctl -f
+$ journalctl -f
+
   -- Logs begin at Mon 2020-10-19 10:09:50 UTC. --
   Oct 26 02:31:35 ubuntu-01 docker.dockerd[1781]: time="2020-10-26T02:31:35.429587085Z" level=error msg="Handler for POST /v1.40/containers/aef879b89cd75d23249e76091a4716c1303855b904979e983920aae02da01d18/start returned error: error while creating mount source path '/opt/cni/bin': mkdir /opt/cni: read-only file system"
   Oct 26 02:31:35 ubuntu-01 kubelet[281110]: E1026 02:31:35.474035  281110 remote_runtime.go:248] StartContainer "aef879b89cd75d23249e76091a4716c1303855b904979e983920aae02da01d18" from runtime service failed: rpc error: code = Unknown desc = failed to start container "aef879b89cd75d23249e76091a4716c1303855b904979e983920aae02da01d18": Error response from daemon: error while creating mount source path '/opt/cni/bin': mkdir /opt/cni: read-only file system
@@ -72,7 +73,22 @@ tags:
 error while creating mount source path '/opt/cni/bin': mkdir /opt/cni: read-only file system
 ```
 
-因此，通过重启 **Docker** 解决问题:
+但宿主机目录 **/opt/bin** 的权限为:
+
+``` bash
+$ stat /opt/cni/
+
+  File: /opt/cni/
+  Size: 4096            Blocks: 8          IO Block: 4096   directory
+Device: fd00h/64768d    Inode: 917533      Links: 3
+Access: (0755/drwxr-xr-x)  Uid: (    0/    root)   Gid: (    0/    root)
+Access: 2020-10-26 01:41:07.222221020 +0000
+Modify: 2020-10-20 13:00:36.461719609 +0000
+Change: 2020-10-20 13:00:36.461719609 +0000
+ Birth: -
+```
+
+因此，推测为 **Docker** 服务的问题。最终，通过重启 **Docker** 解决问题:
 
 ``` bash
 sudo systemctl restart docker.service
