@@ -1,6 +1,6 @@
 ---
 title: Kubernetes StatefulSet
-date: 2020-10-27 09:58:31
+date: 2020-10-27 11:58:31
 tags:
   - kubernetes
   - controllers
