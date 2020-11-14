@@ -8,7 +8,7 @@ tags:
 ---
 
 
-![nvidia-container-toolkit.png](/images/using-nvidia-gpu-on-kubernetes/nvidia-container-toolkit.png)
+![nvidia-container-toolkit.png](/images/nvidia-docker/nvidia-container-toolkit.png)
 
 Nvidia Container Toolkit 包含容器运行时库和一些工具，用于自动配置容器使用 GPU 资源。并且，支持多种不同的容器引擎，如 Docker、LXC、Podman 等。用户根据需要可以自行选择使用哪种引擎。
 
@@ -23,7 +23,7 @@ Nvidia Container Toolkit 的架构允许其支持任何容器运行时。若以 
 
 下图为各个组件的关系:
 
-![nvidia-docker-arch.png](/images/using-nvidia-gpu-on-kubernetes/nvidia-docker-arch.png)
+![nvidia-docker-arch.png](/images/nvidia-docker/nvidia-docker-arch.png)
 
 ### Components and Packages
 
