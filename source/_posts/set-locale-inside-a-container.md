@@ -16,8 +16,8 @@ apt install -y locales
 sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen
 locale-gen
 echo "export LANG=en_US.UTF-8" >> ~/.bashrc
-echo "export LANGUAGE =en_US.UTF-8" >> ~/.bashrc
-echo "export LC_ALL =en_US.UTF-8" >> ~/.bashrc
+echo "export LANGUAGE=en_US.UTF-8" >> ~/.bashrc
+echo "export LC_ALL=en_US.UTF-8" >> ~/.bashrc
 ```
 
 ## 在 Dockerfile 中处理
