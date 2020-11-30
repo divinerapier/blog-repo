@@ -18,6 +18,9 @@ locale-gen
 echo "export LANG=en_US.UTF-8" >> ~/.bashrc
 echo "export LANGUAGE=en_US.UTF-8" >> ~/.bashrc
 echo "export LC_ALL=en_US.UTF-8" >> ~/.bashrc
+echo "set fileencodings=utf-8,ucs-bom,gb18030,gbk,gb2312,cp936" >> ~/.vimrc
+echo "set termencoding=utf-8" >> ~/.vimrc
+echo "set encoding=utf-8" >> ~/.vimrc
 ```
 
 ## 在 Dockerfile 中处理
@@ -27,7 +30,12 @@ RUN apt update --fix-missing \
     && apt install -y locales \
     && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen \
     && locale-gen
-ENV LANG en_US.UTF-8  
-ENV LANGUAGE en_US.UTF-8  
+
+RUN echo "set fileencodings=utf-8,ucs-bom,gb18030,gbk,gb2312,cp936" >> ~/.vimrc \
+    && echo "set termencoding=utf-8" >> ~/.vimrc \
+    && echo "set encoding=utf-8" >> ~/.vimrc
+
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 ```
