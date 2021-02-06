@@ -48,12 +48,14 @@ libnvidia-container 提供了一个定义良好的 API 和一个封装好的 CLI
 ``` bash
 $ cat /etc/docker/daemon.json
 {
-"default-runtime": "nvidia",
-"runtimes": {
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "default-runtime": "nvidia",
+  "runtimes": {
     "nvidia": {
         "path": "/usr/bin/nvidia-container-runtime",
         "runtimeArgs": []
     }
+  }
 }
 ```
 

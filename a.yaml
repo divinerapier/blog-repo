@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: xuesihao-node9-sleep-01
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+      - image: harbor-ai.btpoc.com/ai/asr:1
+        name: xuesihao-node9-sleep-01
+        command: ["/bin/bash","-c","sleep 86400"]
+        resources:
+          limits:
+            nvidia.com/gpu: 0
+            cpu: "5"
+            memory: "5Gi"
+          requests:
+            nvidia.com/gpu: 0
+            cpu: "5"
+            memory: "5Gi"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        - name: iscsi
+          mountPath: /iscsi
+      nodeName: node9-ai.btpoc.com
+      volumes:
+      - name: data
+        hostPath:
+          path: /data
+          type: Directory
+      - name: iscsi
+        hostPath:
+          path: /iscsi
+          type: Directory
