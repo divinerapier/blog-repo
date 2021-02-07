@@ -21,7 +21,7 @@ tags:
 
 ## 可读性 (readability)
 
-> Martin Fowler:"Any fool ccan write code that a computer can understand. Good programmers write code that humans can understand."
+> Martin Fowler:"Any fool can write code that a computer can understand. Good programmers write code that humans can understand."
 
 代码被阅读的次数远超过被编写的次数，无论是学习编程、修改代码、添加代码还是进行 Code Review 时，都需要对代码进行阅读。
 
@@ -63,4 +63,4 @@ tags:
 
 ## 可测试性 (testability)
 
-编写已于单元测试的代码。
+编写易于单元测试的代码，如果为你的代码编写单元测试很困难，那你可能需要思考，你的一个函数或模块是不是做了太多的事情。
