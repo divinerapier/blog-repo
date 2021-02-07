@@ -123,8 +123,6 @@ type Storage interface {
 综上所述，下面实现 **方法二**:
 
 ``` go
-type Service struct {}
-
 type Batch struct {
   From    string
   Targets []string
